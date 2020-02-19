@@ -22,6 +22,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2. Application", "2. Application", "{6291CDEF-0DCA-4D31-8069-BB75E5E7F618}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3. Domain", "3. Domain", "{B05D0341-2681-4033-87BB-FC8E5DA15100}"
+	ProjectSection(SolutionItems) = preProject
+		SS.Template.Application\ServiceLayer-Examples\Products\ProductsService.cs = SS.Template.Application\ServiceLayer-Examples\Products\ProductsService.cs
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

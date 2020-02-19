@@ -301,6 +301,8 @@ namespace SS.Template.Api
 
             // Services
             services.AddServices(applicationAssembly);
+            services.AddTransient<IImageResizer, ImageResizer>();
+
 
             // MediatR
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));

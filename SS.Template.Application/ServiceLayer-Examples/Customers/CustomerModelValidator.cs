@@ -3,9 +3,9 @@ using SS.Template.Core;
 
 namespace SS.Template.Application.Customers
 {
-    public sealed class CustomerModelValidator : AbstractValidator<CustomerModel>
+    public sealed class ProductDetailsModelValidator : AbstractValidator<CustomerModel>
     {
-        public CustomerModelValidator()
+        public ProductDetailsModelValidator()
         {
             RuleFor(x => x.Name)
                 .NotEmpty()
