@@ -6,7 +6,7 @@ namespace SS.Template.Application.Queries
     {
         public const int MinPage = 1;
         public const int MinPageSize = 1;
-        public const int DefaultPageSize = 10;
+        public const int DefaultPageSize = 9;
         public const int MaxPageSize = 128;
 
         private int _page = MinPage;

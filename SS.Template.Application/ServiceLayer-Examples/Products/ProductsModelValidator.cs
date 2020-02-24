@@ -9,7 +9,7 @@ namespace SS.Template.Application.Products
         {
             RuleFor(x => x.Name)
                 .NotEmpty()
-                .Matches(Regex.Letters)
+                .Matches(Regex.LettersNSpaces)
                 .MaximumLength(AppConstants.StandardValueLength);
             RuleFor(x => x.Description)
                 .Matches(Regex.Desc)
