@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -93,23 +95,45 @@ namespace SS.Template.Application.Products
             return page;
         }
 
+        private string ImageResize(string img, int height, int width)
+        {
+            string saveHeaders = img.Substring(0,22);
+            string imageWithoutHeaders = img.Substring(23);
+
+            var stream = new MemoryStream(Convert.FromBase64String(imageWithoutHeaders));
+            var output = new MemoryStream();
+
+            this._resizer.Resize(stream, output, height, width);
+
+            string resizedImage = Convert.ToBase64String(output.GetBuffer());
+
+            return saveHeaders+','+resizedImage;
+        }
+
+
         public async Task Create(ProductsModel product)
         {
             var entity = _mapper.Map<Product>(product);
+
+            entity.ImgSource=this.ImageResize(entity.ImgSource, 225, 225);
 
             _repository.Add(entity);
 
             await _repository.SaveChangesAsync();
 
             var productid = entity.Id;
-            var categories = product.Categories.ToList();
-
-            foreach(var cat in categories)
+            if (product.Categories!=null)
             {
-                _repository.Add(new ProductCat() { CategoryId = cat.Id, ProductId = productid });
-                await _repository.SaveChangesAsync();
+                var categories = product.Categories.ToList();
 
+                foreach (var cat in categories)
+                {
+                    _repository.Add(new ProductCat() { CategoryId = cat.Id, ProductId = productid });
+                    await _repository.SaveChangesAsync();
+
+                }
             }
+            
         }
 
         public async Task Update(Guid id, ProductsModel product)
@@ -121,6 +145,7 @@ namespace SS.Template.Application.Products
                 throw EntityNotFoundException.For<Product>(id);
             }
             _mapper.Map(product, entity);
+            entity.ImgSource = this.ImageResize(product.ImgSource, 225, 225);
 
             await _repository.SaveChangesAsync();
 
