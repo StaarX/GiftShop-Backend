@@ -7,10 +7,10 @@ using SS.Template.Domain.Model;
 
 namespace SS.Template.Domain.Entities
 {
-    public class OrderItem : Entity, IStatus<EnabledStatus>, IHaveDateCreated, IHaveDateUpdated
+    public class CartItem : Entity, IStatus<EnabledStatus>, IHaveDateCreated, IHaveDateUpdated
     {
-        public Guid OrderID { get; set; }
-        public Order Order { get; set; }
+        public Guid CartID { get; set; }
+        public Cart Cart { get; set; }
         public Guid ProductDetailsId { get; set; }
         public ProductDetails ProductDetail { get; set; }
         public int Quantity { get; set; }

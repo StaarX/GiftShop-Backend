@@ -7,14 +7,13 @@ using SS.Template.Domain.Model;
 
 namespace SS.Template.Domain.Entities
 {
-    public class Order : Entity, IStatus<EnabledStatus>, IHaveDateCreated, IHaveDateUpdated
+    public class Cart : Entity, IStatus<EnabledStatus>, IHaveDateCreated, IHaveDateUpdated
     {
         public Guid UserId { get; set; }
-        public User User { get; set; }
 
 
         //Foreign Keys declaration
-        public ICollection<OrderItem> OrderItems { get; set; }
+        public ICollection<CartItem> CartItems { get; set; }
 
 
 

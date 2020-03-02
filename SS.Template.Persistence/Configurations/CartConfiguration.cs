@@ -9,15 +9,13 @@ using SS.Template.Domain.Entities;
 
 namespace SS.Template.Persistence.Configurations
 {
-    public class OrderConfiguration : IEntityTypeConfiguration<Order>
+    public class CartConfiguration : IEntityTypeConfiguration<Cart>
     {
-        public void Configure(EntityTypeBuilder<Order> builder)
+        public void Configure(EntityTypeBuilder<Cart> builder)
         {
             builder.HasKey(x => x.Id);
 
-            builder.HasOne<User>(o => o.User)
-                   .WithMany(u => u.Orders)
-                   .HasForeignKey(o => o.UserId);
-        }
+            builder.Property(x => x.UserId)
+                   .IsRequired();}
     }
 }

@@ -7,5 +7,6 @@ namespace SS.Template.Api.Identity
     {
         public const string Admin = "Admin";
         public const string Terminal = "Terminal";
+        public const string User = "User";
     }
 }

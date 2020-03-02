@@ -42,14 +42,14 @@ namespace SS.Template.Application.Orders
 
         public async Task<OrdersModel> Get(Guid id)
         {
-            var query = _readOnlyRepository.Query<Order>(x => x.Id == id && x.Status == EnabledStatus.Enabled)
+            var query = _readOnlyRepository.Query<Cart>(x => x.Id == id && x.Status == EnabledStatus.Enabled)
                 .ProjectTo<OrdersModel>(_mapper.ConfigurationProvider);
 
             var result = await _readOnlyRepository.SingleAsync(query);
 
             if (result == null)
             {
-                throw EntityNotFoundException.For<Order>(id);
+                throw EntityNotFoundException.For<Cart>(id);
             }
 
             return result;
@@ -57,7 +57,7 @@ namespace SS.Template.Application.Orders
 
         public async Task<PaginatedResult<OrdersModel>> GetPage(PaginatedQuery request)
         {
-            var query = _readOnlyRepository.Query<Order>(x => x.Status == EnabledStatus.Enabled);
+            var query = _readOnlyRepository.Query<Cart>(x => x.Status == EnabledStatus.Enabled);
 
             if (!string.IsNullOrEmpty(request.Term))
             {
@@ -76,7 +76,7 @@ namespace SS.Template.Application.Orders
 
         public async Task Create(OrdersModel Order)
         {
-            var entity = _mapper.Map<Order>(Order);
+            var entity = _mapper.Map<Cart>(Order);
 
             _repository.Add(entity);
 
@@ -85,11 +85,11 @@ namespace SS.Template.Application.Orders
 
         public async Task Update(Guid id, OrdersModel Order)
         {
-            var entity = await _repository.FirstAsync<Order>(x => x.Id == id);
+            var entity = await _repository.FirstAsync<Cart>(x => x.Id == id);
 
             if (entity == null)
             {
-                throw EntityNotFoundException.For<Order>(id);
+                throw EntityNotFoundException.For<Cart>(id);
             }
 
             _mapper.Map(Order, entity);
@@ -98,11 +98,11 @@ namespace SS.Template.Application.Orders
 
         public async Task Delete(Guid id)
         {
-            var entity = await _repository.FirstAsync<Order>(x => x.Id == id);
+            var entity = await _repository.FirstAsync<Cart>(x => x.Id == id);
 
             if (entity == null)
             {
-                throw EntityNotFoundException.For<Order>(id);
+                throw EntityNotFoundException.For<Cart>(id);
             }
 
             _repository.Remove(entity);

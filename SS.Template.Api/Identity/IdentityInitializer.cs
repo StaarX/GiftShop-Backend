@@ -30,6 +30,11 @@ namespace SS.Template.Api.Identity
                 await _roleManager.CreateAsync(new Role { Name = Role.Admin });
             }
 
+            if (!await _roleManager.RoleExistsAsync(Role.User))
+            {
+                await _roleManager.CreateAsync(new Role { Name = Role.User });
+            }
+
             if (await _userManager.FindByEmailAsync(adminEmail) == null)
             {
                 var user = new User

@@ -30,6 +30,15 @@ namespace SS.Template.Api.Controllers
             return Ok(page);
         }
 
+        // GET: api/products
+        [HttpGet("categoryfiltered/{categoryid:guid}")]
+        [ProducesResponseType(typeof(PaginatedResult<ProductsModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Get([FromQuery] PaginatedQuery query, Guid categoryid)
+        {
+            var page = await _productsService.GetPage(query, categoryid);
+            return Ok(page);
+        }
+
         // GET: api/products/categories
         [HttpGet("categories")]
         [ProducesResponseType(typeof(PaginatedResult<Category>), StatusCodes.Status200OK)]

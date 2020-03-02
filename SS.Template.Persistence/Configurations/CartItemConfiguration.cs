@@ -10,24 +10,24 @@ using SS.Template.Domain.Entities;
 
 namespace SS.Template.Persistence.Configurations
 {
-    public class UserConfiguration : IEntityTypeConfiguration<User>
+    public class CartItemConfiguration : IEntityTypeConfiguration<CartItem>
     {
-        public void Configure(EntityTypeBuilder<User> builder)
+        public void Configure(EntityTypeBuilder<CartItem> builder)
         {
-            builder.HasKey(u => u.Id);
+            builder.HasKey(x => new {x.Id,x.CartID});
 
-            builder.Property(x => x.Name)
+            builder.Property(x => x.Quantity)
                    .IsRequired()
                    .HasMaxLength(AppConstants.StandardValueLength);
-            builder.Property(x => x.Email)
+
+            builder.Property(x => x.UnitPrice)
                    .IsRequired()
                    .HasMaxLength(AppConstants.StandardValueLength);
-            builder.Property(x => x.Password)
-                   .IsRequired()
-                   .HasMaxLength(AppConstants.StandardValueLength);
-            builder.Property(x => x.Role)
-                   .IsRequired()
-                   .HasMaxLength(AppConstants.StandardValueLength);
+
+            builder.HasOne<Cart>(oi => oi.Cart)
+                   .WithMany(o => o.CartItems)
+                   .HasForeignKey(oi => oi.CartID);
+                       
         }
     }
 }

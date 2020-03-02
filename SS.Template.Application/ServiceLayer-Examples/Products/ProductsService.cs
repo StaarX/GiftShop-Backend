@@ -18,7 +18,8 @@ namespace SS.Template.Application.Products
 {
     public interface IProductsService
     {
-        Task<PaginatedResult<ProductsModel>> GetPage(PaginatedQuery request);
+        Task<PaginatedResult<ProductsListModel>> GetPage(PaginatedQuery request);
+        Task<PaginatedResult<ProductsListModel>> GetPage(PaginatedQuery request, Guid categoryid);
 
         Task<ProductsModel> Get(Guid id);
         Task<PaginatedResult<Category>> GetCategories(PaginatedQuery request);
@@ -64,6 +65,23 @@ namespace SS.Template.Application.Products
                 throw EntityNotFoundException.For<Product>(id);
             }
 
+            //Maybe there are a better way to filter this (Deleted details filter)
+            if (result.ProductDetails != null)
+            {
+                var dbDetails = result.ProductDetails.ToList();
+                var aux = new List<ProductDetails>();
+
+                dbDetails.ForEach(detail => {
+                    if (detail.Status==EnabledStatus.Enabled)
+                    {
+                        aux.Add(detail);
+                    }
+                });
+
+                result.ProductDetails = aux;
+            }
+            
+
             result.Categories = new List<Category>();
 
             queryCategory.ForEach(x => {
@@ -76,7 +94,7 @@ namespace SS.Template.Application.Products
             return result;
         }
 
-        public async Task<PaginatedResult<ProductsModel>> GetPage(PaginatedQuery request)
+        public async Task<PaginatedResult<ProductsListModel>> GetPage(PaginatedQuery request)
         {
             var query = _readOnlyRepository.Query<Product>(x => x.Status == EnabledStatus.Enabled);
 
@@ -88,12 +106,35 @@ namespace SS.Template.Application.Products
 
             var sortCriteria = request.GetSortCriteria();
             var items = query
-                .ProjectTo<ProductsModel>(_mapper.ConfigurationProvider)
+                .ProjectTo<ProductsListModel>(_mapper.ConfigurationProvider)
                 .OrderByOrDefault(sortCriteria, x => x.Name);
 
             var page = await _paginator.MakePageAsync(_readOnlyRepository, query, items, request);
+
             return page;
         }
+
+
+        public async Task<PaginatedResult<ProductsListModel>> GetPage(PaginatedQuery request,Guid categoryid)
+        {
+            var query = _readOnlyRepository.Query<ProductCat>(x => x.CategoryId==categoryid && x.Product.Status==EnabledStatus.Enabled, y=> y.Product);
+
+            if (!string.IsNullOrEmpty(request.Term))
+            {
+                var term = request.Term.Trim();
+                query = query.Where(x => x.Product.Name.Contains(term));
+            }
+
+            var sortCriteria = request.GetSortCriteria();
+            var items = query
+                .ProjectTo<ProductsListModel>(_mapper.ConfigurationProvider)
+                .OrderByOrDefault(sortCriteria, x => x.Name);
+
+            var page = await _paginator.MakePageAsync(_readOnlyRepository, query, items, request);
+
+            return page;
+        }
+
 
         private string ImageResize(string img, int height, int width)
         {
@@ -149,10 +190,8 @@ namespace SS.Template.Application.Products
 
             await _repository.SaveChangesAsync();
 
-
-            //Variable declaration
-            bool same = true;
-            var productId = entity.Id;
+            //Updating categories.
+            bool validator = true;
 
             if (product.ProductCatRelation==null)
             {
@@ -169,45 +208,162 @@ namespace SS.Template.Application.Products
             catch (Exception e)
             {
                 Console.WriteLine($"An exception have been thrown {e.StackTrace}");
-                same = false;
+                validator = false;
             }
 
-            if (!same)
-            {
-                return;
-            }
-
-
-            if (dbCategories.Count==newCategories.Count)
-            {
-                for (int i = 0; i < dbCategories.Count; i++)
+            if (validator){
+                if (dbCategories.Count == newCategories.Count)
                 {
-                    if (dbCategories[i].CategoryId!=newCategories[i].Id)
+                    for (int i = 0; i < dbCategories.Count; i++)
+                    {
+                        if (dbCategories[i].CategoryId != newCategories[i].Id)
+                        {
+                            validator = false;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    validator = false;
+                }
+
+                if (!validator)
+                {
+                    for (int i = 0; i < dbCategories.Count; i++)
+                    {
+                        var aux = dbCategories[i];
+                        _repository.Remove(aux);
+                        await _repository.SaveChangesAsync();
+                    }
+                    for (int i = 0; i < newCategories.Count; i++)
+                    {
+                        _repository.Add(new ProductCat() { CategoryId = newCategories[i].Id, ProductId = id });
+                        await _repository.SaveChangesAsync();
+                    }
+
+                }
+            }
+
+
+            
+
+            //Updating productDetails.
+            validator = true;
+            bool same = true;
+
+            var dbDetails = _repository.Query<ProductDetails>(x => x.ProductId == id && x.Status==EnabledStatus.Enabled).ToList();
+            var newDetails = new List<ProductDetails>();
+
+            try
+            {
+                newDetails = product.ProductDetails.ToList();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"An exception have been thrown {e.StackTrace}");
+                validator = false;
+            }
+
+            if (dbDetails.Count<=0 && !validator)
+            {
+               return;
+            }
+            //Delete all product details case.
+            if (dbDetails.Count > 0 && !validator)
+            {
+                for (int i = 0; i < dbDetails.Count; i++)
+                {
+                    dbDetails[i].Status = EnabledStatus.Deleted;
+                    _repository.Update(dbDetails[i]);
+                    await _repository.SaveChangesAsync();
+                }
+
+                return;
+                    
+            }
+
+            if (dbDetails.Count==newDetails.Count)
+            {
+                for (int i = 0; i < dbDetails.Count; i++)
+                {
+                    if (!newDetails.Contains(dbDetails[i]))
                     {
                         same = false;
                         break;
                     }
                 }
+                //Updating if the list are with the same product details.
+                if (same)
+                {
+                    for (int i = 0; i < dbDetails.Count; i++)
+                    {
+                        for (int y = 0; y < newDetails.Count; y++)
+                        {
+                            if (dbDetails[i].Id==newDetails[y].Id)
+                            {
+                                dbDetails[i].Price= newDetails[y].Price;
+                                dbDetails[i].Type = newDetails[y].Type;
+                                dbDetails[i].Availability = newDetails[y].Availability;
+                                _repository.Update(dbDetails[i]);
+                                await _repository.SaveChangesAsync();
+                            }
+                        }
+                    }
+                }
+
             }
             else
             {
                 same = false;
             }
 
+            //Not same items in the list case.
             if (!same)
             {
-                for (int i = 0; i < dbCategories.Count; i++)
+                //Deleting in case a item in the new details is not in the db details (Deleted).
+                for (int i = 0; i < dbDetails.Count; i++)
                 {
-                    var aux = dbCategories[i];
-                    _repository.Remove(aux);
-                    await _repository.SaveChangesAsync();
-                }
-                for (int i = 0; i < newCategories.Count; i++)
-                {
-                    _repository.Add(new ProductCat() { CategoryId = newCategories[i].Id, ProductId = id });
-                    await _repository.SaveChangesAsync();
+                    if (!newDetails.Contains(dbDetails[i]))
+                    {
+                        dbDetails[i].Status = EnabledStatus.Deleted;
+                        _repository.Update(dbDetails[i]);
+                        await _repository.SaveChangesAsync();
+                    }
                 }
 
+
+                //Updating new details.
+                bool changed = false;
+                for (int i = 0; i < newDetails.Count; i++)
+                {
+                    //Searching for same items and updating them.
+                    for (int y = 0; y < dbDetails.Count; y++)
+                    {
+                        if (dbDetails[y].Id == newDetails[i].Id)
+                        {
+                            dbDetails[y].Price = newDetails[i].Price;
+                            dbDetails[y].Type = newDetails[i].Type;
+                            dbDetails[y].Availability = newDetails[i].Availability;
+                            _repository.Update(dbDetails[y]);
+                            await _repository.SaveChangesAsync();
+                            changed = true;
+                            break;
+                        }
+                    }
+
+                    //In case a item is not in the data base already is added to.
+                    if (!changed)
+                    {
+                        _repository.Add(newDetails[i]);
+                        await _repository.SaveChangesAsync();
+                        changed = false;
+                    }
+                    else
+                    {
+                        changed = false;
+                    }
+                }
             }
 
         }
