@@ -10,40 +10,40 @@ using SS.Template.Core.Persistence;
 using SS.Template.Domain.Entities;
 using SS.Template.Domain.Model;
 
-namespace SS.Template.Application.Orders
+namespace SS.Template.Application.ShopCart
 {
-    public interface IOrdersService
+    public interface ICartService
     {
-        Task<PaginatedResult<OrdersModel>> GetPage(PaginatedQuery request);
+        Task<PaginatedResult<CartModel>> GetPage(PaginatedQuery request);
 
-        Task<OrdersModel> Get(Guid id);
+        Task<CartModel> Get(Guid id);
 
-        Task Create(OrdersModel orders);
+        Task Create(CartModel orders);
 
-        Task Update(Guid id, OrdersModel orders);
+        Task Update(Guid id, CartModel orders);
 
         Task Delete(Guid id);
     }
 
-    public class OrdersService : IOrdersService
+    public class CartService : ICartService
     {
         private readonly IReadOnlyRepository _readOnlyRepository;
         private readonly IMapper _mapper;
         private readonly IPaginator _paginator;
         private readonly IRepository _repository;
 
-        public OrdersService(IReadOnlyRepository readOnlyRepository, IMapper mapper, IPaginator paginator, IRepository repository)
+        public CartService(IReadOnlyRepository readOnlyRepository, IMapper mapper, IPaginator paginator, IRepository repository)
         {
             _readOnlyRepository = readOnlyRepository;
             _mapper = mapper;
             _paginator = paginator;
             _repository = repository;
         }
-
-        public async Task<OrdersModel> Get(Guid id)
+        //Get cart by UserId
+        public async Task<CartModel> Get(Guid id)
         {
-            var query = _readOnlyRepository.Query<Cart>(x => x.Id == id && x.Status == EnabledStatus.Enabled)
-                .ProjectTo<OrdersModel>(_mapper.ConfigurationProvider);
+            var query = _readOnlyRepository.Query<Cart>(x => x.UserId == id && x.Status == EnabledStatus.Enabled)
+                .ProjectTo<CartModel>(_mapper.ConfigurationProvider);
 
             var result = await _readOnlyRepository.SingleAsync(query);
 
@@ -54,8 +54,8 @@ namespace SS.Template.Application.Orders
 
             return result;
         }
-
-        public async Task<PaginatedResult<OrdersModel>> GetPage(PaginatedQuery request)
+       
+        public async Task<PaginatedResult<CartModel>> GetPage(PaginatedQuery request)
         {
             var query = _readOnlyRepository.Query<Cart>(x => x.Status == EnabledStatus.Enabled);
 
@@ -67,23 +67,41 @@ namespace SS.Template.Application.Orders
 
             var sortCriteria = request.GetSortCriteria();
             var items = query
-                .ProjectTo<OrdersModel>(_mapper.ConfigurationProvider)
+                .ProjectTo<CartModel>(_mapper.ConfigurationProvider)
                 .OrderByOrDefault(sortCriteria, x => x.DateCreated);
 
             var page = await _paginator.MakePageAsync(_readOnlyRepository, query, items, request);
             return page;
         }
 
-        public async Task Create(OrdersModel Order)
+        //This should be used when a new user signs up
+        public async Task Create(CartModel cart)
         {
-            var entity = _mapper.Map<Cart>(Order);
+            var entity = _mapper.Map<Cart>(cart);
 
             _repository.Add(entity);
-
             await _repository.SaveChangesAsync();
+            if (cart.CartItems != null)
+            {
+                var cartitemslist=cart.CartItems.ToList();
+
+                foreach (var item in cart.CartItems)
+                {
+                    _repository.Add(new CartItem() {ProductDetailsId=item.ProductDetailsId,
+                                                    CartID=item.CartID,
+                                                    Quantity=item.Quantity,
+                                                    UnitPrice=item.ProductDetail.Price,
+
+                                                });
+                    await _repository.SaveChangesAsync();
+                }
+            }
+
         }
 
-        public async Task Update(Guid id, OrdersModel Order)
+
+
+        public async Task Update(Guid id, CartModel cart)
         {
             var entity = await _repository.FirstAsync<Cart>(x => x.Id == id);
 
@@ -92,7 +110,7 @@ namespace SS.Template.Application.Orders
                 throw EntityNotFoundException.For<Cart>(id);
             }
 
-            _mapper.Map(Order, entity);
+            _mapper.Map(cart, entity);
             await _repository.SaveChangesAsync();
         }
 

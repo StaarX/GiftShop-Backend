@@ -20,7 +20,6 @@ namespace SS.Template.Persistence
             {
                 await _context.Database.MigrateAsync();
             }
-
 #if DEBUG
             if (!await _context.Examples.AnyAsync())
             {

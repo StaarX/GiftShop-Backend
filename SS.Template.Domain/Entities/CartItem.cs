@@ -7,7 +7,7 @@ using SS.Template.Domain.Model;
 
 namespace SS.Template.Domain.Entities
 {
-    public class CartItem : Entity, IStatus<EnabledStatus>, IHaveDateCreated, IHaveDateUpdated
+    public class CartItem : IStatus<EnabledStatus>, IHaveDateCreated, IHaveDateUpdated
     {
         public Guid CartID { get; set; }
         public Cart Cart { get; set; }

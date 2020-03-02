@@ -1,15 +1,14 @@
 using AutoMapper;
 using SS.Template.Domain.Entities;
 
-namespace SS.Template.Application.Orders
+namespace SS.Template.Application.ShopCart
 {
-    public sealed class OrdersMapping : Profile
+    public sealed class CartMapping : Profile
     {
-        public OrdersMapping()
+        public CartMapping()
         {
-            CreateMap<Product, OrdersModel>()
+            CreateMap<Cart, CartModel>()
                 .ReverseMap()
-                .ForMember(x => x.Id, e => e.Ignore())
                 .ForMember(x => x.Status, e => e.Ignore())
                 .ForMember(x => x.DateCreated, e => e.Ignore())
                 .ForMember(x => x.DateUpdated, e => e.Ignore());

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SS.Template.Application.Orders;
+using SS.Template.Application.ShopCart;
 using SS.Template.Application.Queries;
 
 namespace SS.Template.Api.Controllers
@@ -11,65 +11,65 @@ namespace SS.Template.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [AllowAnonymous]
-    public class OrdersController : ControllerBase
+    public class CartController : ControllerBase
     {
-        private readonly IOrdersService _ordersService;
+        private readonly ICartService _cartService;
 
-        public OrdersController(IOrdersService ordersService)
+        public CartController(ICartService cartService)
         {
-            _ordersService = ordersService;
+            _cartService = cartService;
         }
 
-        // GET: api/orders
+        // GET: api/cart
         [HttpGet]
-        [ProducesResponseType(typeof(PaginatedResult<OrdersModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PaginatedResult<CartModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> Get([FromQuery] PaginatedQuery query)
         {
-            var page = await _ordersService.GetPage(query);
+            var page = await _cartService.GetPage(query);
             return Ok(page);
         }
 
-        // GET: api/orders/guid
+        // GET: api/cart/guid
         [HttpGet("{id:guid}")]
-        [ProducesResponseType(typeof(OrdersModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(CartModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Get(Guid id)
         {
-            var orders = await _ordersService.Get(id);
-            return Ok(orders);
+            var cart = await _cartService.Get(id);
+            return Ok(cart);
         }
 
-        // POST: api/orders
+        // POST: api/cart
         //Admin Route
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Save([FromBody] OrdersModel orders)
+        public async Task<IActionResult> Save([FromBody] CartModel cart)
         {
-            await _ordersService.Create(orders);
+            await _cartService.Create(cart);
             return Ok();
         }
 
-        // PUT: api/orderss/5
+        // PUT: api/cart/5
         //Admin Route
         [HttpPut("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Update(Guid id, [FromBody] OrdersModel orders)
+        public async Task<IActionResult> Update(Guid id, [FromBody] CartModel cart)
         {
-            await _ordersService.Update(id, orders);
+            await _cartService.Update(id, cart);
             return Ok();
         }
 
-        // DELETE: api/orderss/5
+        // DELETE: api/cart/5
         //Admin Route
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await _ordersService.Delete(id);
+            await _cartService.Delete(id);
             return Ok();
         }
     }

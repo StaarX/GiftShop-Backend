@@ -12,8 +12,6 @@ namespace SS.Template.Persistence
     public class AppDbContext : DbContext
     {
         public DbSet<Example> Examples { get; set; }
-
-        public DbSet<Customer> Customers { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
 

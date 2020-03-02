@@ -14,7 +14,7 @@ namespace SS.Template.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<CartItem> builder)
         {
-            builder.HasKey(x => new {x.Id,x.CartID});
+            builder.HasKey(x => new {x.ProductDetailsId,x.CartID});
 
             builder.Property(x => x.Quantity)
                    .IsRequired()
