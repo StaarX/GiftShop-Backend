@@ -7,7 +7,7 @@ namespace SS.Template.Application.ShopCart
 {
     public class CartModel
     {
-
+        public Guid Id { get; set; }
         public Guid UserId { get; set; }
 
         public ICollection<CartItem> CartItems { get; set; }

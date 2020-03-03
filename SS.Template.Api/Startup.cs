@@ -89,6 +89,7 @@ namespace SS.Template.Api
 
             services.AddHealthChecks();
 
+
             AddIdentity(services);
             AddAuthentication(services, Configuration);
 
@@ -229,6 +230,7 @@ namespace SS.Template.Api
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                     options.SerializerSettings.MissingMemberHandling = MissingMemberHandling.Ignore;
                     options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .AddFluentValidation(options =>

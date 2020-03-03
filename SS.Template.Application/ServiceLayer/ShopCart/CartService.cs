@@ -47,6 +47,10 @@ namespace SS.Template.Application.ShopCart
 
             var result = await _readOnlyRepository.SingleAsync(query);
 
+            var CartId = result.Id;
+
+            result.CartItems = _readOnlyRepository.Query<CartItem>(x => x.CartID == CartId && x.Status == EnabledStatus.Enabled, i => i.ProductDetail.Product).ToList();
+
             if (result == null)
             {
                 throw EntityNotFoundException.For<Cart>(id);
