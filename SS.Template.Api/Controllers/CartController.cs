@@ -50,26 +50,52 @@ namespace SS.Template.Api.Controllers
             return Ok();
         }
 
+        [HttpPost("insertItem")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Save([FromBody] CartItemModel cartitem)
+        {
+            await _cartService.insertItem(cartitem);
+            return Ok();
+        }
+
+        [HttpPut("updateQty")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Update([FromBody] CartItemModel cartitem)
+        {
+            await _cartService.updateQty(cartitem);
+            return Ok();
+        }
+
+        [HttpPut("buyTheCart")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Update([FromBody] CartModel cart)
+        {
+            var boughtmodel=await _cartService.buyTheCart(cart);
+            return Ok(boughtmodel);
+        }
+
         // PUT: api/cart/5
-        //Admin Route
         [HttpPut("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Update(Guid id, [FromBody] CartModel cart)
         {
-            await _cartService.Update(id, cart);
-            return Ok();
+            var updatedcart = await _cartService.Update(id, cart);
+            return Ok(updatedcart);
         }
 
         // DELETE: api/cart/5
         //Admin Route
-        [HttpDelete("{id:guid}")]
+        [HttpDelete("{idcart:guid}/{iddetail:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid idcart, Guid iddetail)
         {
-            await _cartService.Delete(id);
+            await _cartService.Delete(idcart,iddetail);
             return Ok();
         }
     }

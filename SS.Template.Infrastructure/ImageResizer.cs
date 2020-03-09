@@ -35,14 +35,15 @@ namespace SS.Template.Infrastructure
             }
 
             using var image = Image.Load(input);
-            var ratio = CalculateRatio(image, maxWidth, maxHeight);
+            //var ratio = CalculateRatio(image, maxWidth, maxHeight);
 
-            if (ratio < 1)
-            {
-                var newWidth = Convert.ToInt32(image.Width * ratio);
-                var newHeight = Convert.ToInt32(image.Height * ratio);
-                image.Mutate(x => x.Resize(newWidth, newHeight));
-            }
+            //if (ratio < 1)
+            //{
+            //    var newWidth = Convert.ToInt32(image.Width * ratio);
+            //    var newHeight = Convert.ToInt32(image.Height * ratio);
+            //    image.Mutate(x => x.Resize(newWidth, newHeight));
+            //}
+            image.Mutate(x => x.Resize(maxWidth, maxHeight));
 
             image.Save(output, _encoder);
         }

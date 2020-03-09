@@ -21,5 +21,24 @@ namespace SS.Template.Domain.Entities
         public EnabledStatus Status { get; set; }
         public DateTime DateCreated { get; set; }
         public DateTime DateUpdated { get; set; }
+
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+            CartItem objAsPart = obj as CartItem;
+            if (objAsPart == null)
+                return false;
+            else
+                return Equals(objAsPart);
+        }
+
+        public bool Equals(CartItem other)
+        {
+            if (other == null)
+                return false;
+            return (this.ProductDetail.Id.Equals(other.ProductDetail.Id));
+        }
     }
 }
