@@ -160,9 +160,9 @@ namespace SS.Template.Application.Products
                 foreach (var cat in categories)
                 {
                     _repository.Add(new ProductCat() { CategoryId = cat.Id, ProductId = productid });
-                    await _repository.SaveChangesAsync();
 
                 }
+                await _repository.SaveChangesAsync();
             }
             
         }
@@ -178,6 +178,7 @@ namespace SS.Template.Application.Products
             _mapper.Map(product, entity);
             entity.ImgSource = this.ImageResize(product.ImgSource, 225, 225);
 
+            //Want to update the product even if the categories or product details (that are optional) are not updated
             await _repository.SaveChangesAsync();
 
             //Updating categories.
@@ -224,19 +225,19 @@ namespace SS.Template.Application.Products
                     {
                         var aux = dbCategories[i];
                         _repository.Remove(aux);
-                        await _repository.SaveChangesAsync();
                     }
                     for (int i = 0; i < newCategories.Count; i++)
                     {
                         _repository.Add(new ProductCat() { CategoryId = newCategories[i].Id, ProductId = id });
-                        await _repository.SaveChangesAsync();
+                        
                     }
 
                 }
             }
+            //Want to update the categories even if product details (that are optional) are not updated
+            await _repository.SaveChangesAsync();
 
 
-            
 
             //Updating productDetails.
             validator = true;
@@ -266,9 +267,8 @@ namespace SS.Template.Application.Products
                 {
                     dbDetails[i].Status = EnabledStatus.Deleted;
                     _repository.Update(dbDetails[i]);
-                    await _repository.SaveChangesAsync();
                 }
-
+                await _repository.SaveChangesAsync();
                 return;
                     
             }
@@ -296,10 +296,11 @@ namespace SS.Template.Application.Products
                                 dbDetails[i].Type = newDetails[y].Type;
                                 dbDetails[i].Availability = newDetails[y].Availability;
                                 _repository.Update(dbDetails[i]);
-                                await _repository.SaveChangesAsync();
                             }
                         }
                     }
+                    await _repository.SaveChangesAsync();
+                    return;
                 }
 
             }
@@ -311,6 +312,7 @@ namespace SS.Template.Application.Products
             //Not same items in the list case.
             if (!same)
             {
+                var foundSome = false;
                 //Deleting in case a item in the new details is not in the db details (Deleted).
                 for (int i = 0; i < dbDetails.Count; i++)
                 {
@@ -318,8 +320,12 @@ namespace SS.Template.Application.Products
                     {
                         dbDetails[i].Status = EnabledStatus.Deleted;
                         _repository.Update(dbDetails[i]);
-                        await _repository.SaveChangesAsync();
+                        foundSome = true;
                     }
+                }
+                if (foundSome)
+                {
+                    await _repository.SaveChangesAsync();
                 }
 
 
@@ -336,7 +342,7 @@ namespace SS.Template.Application.Products
                             dbDetails[y].Type = newDetails[i].Type;
                             dbDetails[y].Availability = newDetails[i].Availability;
                             _repository.Update(dbDetails[y]);
-                            await _repository.SaveChangesAsync();
+                            //await _repository.SaveChangesAsync();
                             changed = true;
                             break;
                         }
@@ -346,7 +352,7 @@ namespace SS.Template.Application.Products
                     if (!changed)
                     {
                         _repository.Add(newDetails[i]);
-                        await _repository.SaveChangesAsync();
+                        //await _repository.SaveChangesAsync();
                         changed = false;
                     }
                     else
@@ -355,7 +361,7 @@ namespace SS.Template.Application.Products
                     }
                 }
             }
-
+            await _repository.SaveChangesAsync();
         }
 
 

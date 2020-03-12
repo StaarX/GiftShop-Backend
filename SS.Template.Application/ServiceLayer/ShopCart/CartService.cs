@@ -109,18 +109,16 @@ namespace SS.Template.Application.ShopCart
 
         public async Task insertItem(CartItemModel cartitem)
         {
-            var query = _readOnlyRepository.Query<Cart>(x => x.UserId == cartitem.UserId && x.Status == EnabledStatus.Enabled)
-               .ProjectTo<CartModel>(_mapper.ConfigurationProvider);
+            var dbItemList = _readOnlyRepository.Query<CartItem>(x => x.Cart.UserId == cartitem.UserId && x.Status == EnabledStatus.Enabled, y=>y.ProductDetail).ToList();
+               
 
-            var result = await _readOnlyRepository.SingleAsync(query);
+            var CartId =dbItemList[0].CartID;
 
-            var CartId = result.Id;
-
-            foreach (var item in result.CartItems)
+            foreach (var item in dbItemList)
             {
                 if (item.ProductDetailsId==cartitem.ProductDetail.Id)
                 {
-                    if ((item.Quantity+cartitem.Quantity)>cartitem.ProductDetail.Availability)
+                    if ((item.Quantity+cartitem.Quantity)>item.ProductDetail.Availability)
                     {
                         _repository.Update(new CartItem()
                         {
