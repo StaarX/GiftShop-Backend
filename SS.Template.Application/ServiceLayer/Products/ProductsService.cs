@@ -65,20 +65,10 @@ namespace SS.Template.Application.Products
                 throw EntityNotFoundException.For<Product>(id);
             }
 
-            //Maybe there are a better way to filter this (Deleted details filter)
+
             if (result.ProductDetails != null)
             {
-                var dbDetails = result.ProductDetails.ToList();
-                var aux = new List<ProductDetails>();
-
-                dbDetails.ForEach(detail => {
-                    if (detail.Status==EnabledStatus.Enabled)
-                    {
-                        aux.Add(detail);
-                    }
-                });
-
-                result.ProductDetails = aux;
+                result.ProductDetails = result.ProductDetails.Where(x=>x.Status==EnabledStatus.Enabled).ToList();
             }
             
 
