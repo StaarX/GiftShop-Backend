@@ -8,6 +8,7 @@ namespace SS.Template.Application.ShopCart
     public class CartItemModel
     {
         public Guid UserId { get; set; }
+        public Guid CartId { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public ProductDetails ProductDetail { get; set; }
